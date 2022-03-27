@@ -7,9 +7,6 @@ use rustcord::{EventHandlers, RichPresenceBuilder, Rustcord, User};
 struct Handlers;
 
 impl EventHandlers for Handlers {
-    fn ready(_user: User) {
-        println!("Welcome {}#{}", _user.username, _user.discriminator);
-    }
 }
 
 struct Counter {
