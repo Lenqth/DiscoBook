@@ -1,13 +1,14 @@
 use std::time::SystemTime;
 
-use iced::{Container, Element, Length, Row, Sandbox, Scrollable, Space, TextInput, button, scrollable};
+use iced::{
+    button, scrollable, Container, Element, Length, Row, Sandbox, Scrollable, Space, TextInput,
+};
 use iced::{Button, Column, Text};
 use rustcord::{EventHandlers, RichPresenceBuilder, Rustcord, User};
 
 struct Handlers;
 
-impl EventHandlers for Handlers {
-}
+impl EventHandlers for Handlers {}
 
 struct Counter {
     // The counter value
@@ -43,7 +44,10 @@ impl Counter {
             )
             .push(
                 // We show the value of the counter here
-                Text::new(self.value.to_string()).size(50).width(Length::FillPortion(5)).horizontal_alignment(iced::HorizontalAlignment::Center),
+                Text::new(self.value.to_string())
+                    .size(50)
+                    .width(Length::FillPortion(5))
+                    .horizontal_alignment(iced::HorizontalAlignment::Center),
             )
             .push(
                 Button::new(&mut self.increment_button, Text::new("+"))
@@ -54,7 +58,6 @@ impl Counter {
     pub fn update(&mut self, message: i32) {
         self.value = message;
     }
-
 }
 
 pub struct Tour {
@@ -62,9 +65,9 @@ pub struct Tour {
     book_name: String,
     start_time: SystemTime,
     discord: Rustcord,
-    
+
     counter: Counter,
-    text_box: iced::text_input::State
+    text_box: iced::text_input::State,
 }
 
 impl Sandbox for Tour {
@@ -81,7 +84,7 @@ impl Sandbox for Tour {
             discord,
 
             counter: Counter::new(1),
-            text_box: iced::text_input::State::new()
+            text_box: iced::text_input::State::new(),
         }
     }
 
@@ -93,13 +96,11 @@ impl Sandbox for Tour {
         match event {
             Message::IncrementPressed => {
                 self.page += 1;
-            },
+            }
             Message::DecrementPressed => {
                 self.page -= 1;
-            },
-            Message::EditName(name) => {
-                self.book_name = name
             }
+            Message::EditName(name) => self.book_name = name,
         }
         self.counter.update(self.page);
 
@@ -109,7 +110,9 @@ impl Sandbox for Tour {
             .start_time(self.start_time)
             .build();
 
-        self.discord.update_presence(presence).expect("Could not update presence");
+        self.discord
+            .update_presence(presence)
+            .expect("Could not update presence");
     }
 
     fn view(&mut self) -> Element<Message> {
@@ -123,7 +126,9 @@ impl Sandbox for Tour {
         } = self;
 
         let mut controls = Column::new();
-        let text_box = TextInput::new(text_box, "Enter book name", book_name, |e| Message::EditName(e));
+        let text_box = TextInput::new(text_box, "Enter book name", book_name, |e| {
+            Message::EditName(e)
+        });
 
         controls = controls.push(text_box);
         controls = controls.push(Space::with_width(Length::Fill));
@@ -138,10 +143,11 @@ impl Sandbox for Tour {
 
         self.discord.run_callbacks();
 
-        Container::new(content).width(Length::Fill).center_x()
+        Container::new(content)
+            .width(Length::Fill)
+            .center_x()
             .height(Length::Fill)
             .center_y()
             .into()
-            
     }
 }
