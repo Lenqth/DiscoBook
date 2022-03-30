@@ -128,10 +128,10 @@ impl Sandbox for Tour {
         let mut controls = Column::new();
         let text_box = TextInput::new(text_box, "Enter book name", book_name, |e| {
             Message::EditName(e)
-        });
+        }).size(50);
 
         controls = controls.push(text_box);
-        controls = controls.push(Space::with_width(Length::Fill));
+        controls = controls.push(Space::with_height(Length::Units(50)));
         controls = controls.push(counter.view());
 
         let content: Element<_> = Column::new()
