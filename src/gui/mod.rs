@@ -1,10 +1,10 @@
 use std::time::SystemTime;
 
-use iced::{
-    button, scrollable, Container, Element, Length, Row, Sandbox, Scrollable, Space, TextInput,
-};
+use iced::{Application, Clipboard, Command, Container, Element, Length, Row, Sandbox, Scrollable, Space, TextInput, button, scrollable};
 use iced::{Button, Column, Text};
 use rustcord::{EventHandlers, RichPresenceBuilder, Rustcord, User};
+
+use crate::save::{AppState, save_settings};
 
 struct Handlers;
 
@@ -70,29 +70,48 @@ pub struct Tour {
     text_box: iced::text_input::State,
 }
 
-impl Sandbox for Tour {
-    type Message = Message;
+impl Tour {
+    fn update_presence(&self) {
+        let presence = RichPresenceBuilder::new()
+            .state(&format!("p.{}", self.page))
+            .details(&self.book_name)
+            .start_time(self.start_time)
+            .build();
 
-    fn new() -> Self {
+        self.discord
+            .update_presence(presence)
+            .expect("Could not update presence");
+
+    }
+}
+
+impl Application for Tour {
+    type Message = Message;
+    type Executor = iced::executor::Default;
+    type Flags = AppState;
+
+    fn new(app_state: Self::Flags) -> (Self, Command<Message>) {
         let discord = Rustcord::init::<Handlers>("957307903931465738", true, None)
             .expect("Could no initialize RPC");
 
-        Self {
-            page: 1,
-            book_name: String::new(),
+        let res = Self {
+            page: app_state.page,
+            book_name: app_state.book_name,
             start_time: SystemTime::now(),
             discord,
 
-            counter: Counter::new(1),
+            counter: Counter::new(app_state.page),
             text_box: iced::text_input::State::new(),
-        }
+        };
+        res.update_presence();
+        (res, Command::none())
     }
 
     fn title(&self) -> String {
         format!("本を読む")
     }
 
-    fn update(&mut self, event: Message) {
+    fn update(&mut self, event: Message, _: &mut Clipboard) -> Command<Message> {
         match event {
             Message::IncrementPressed => {
                 self.page += 1;
@@ -103,16 +122,13 @@ impl Sandbox for Tour {
             Message::EditName(name) => self.book_name = name,
         }
         self.counter.update(self.page);
+        save_settings(AppState {
+            book_name: self.book_name.clone(),
+            page: self.page,
+        });
+        self.update_presence();
 
-        let presence = RichPresenceBuilder::new()
-            .state(&format!("p.{}", self.page))
-            .details(&self.book_name)
-            .start_time(self.start_time)
-            .build();
-
-        self.discord
-            .update_presence(presence)
-            .expect("Could not update presence");
+        Command::none()
     }
 
     fn view(&mut self) -> Element<Message> {
@@ -150,4 +166,5 @@ impl Sandbox for Tour {
             .center_y()
             .into()
     }
+
 }
