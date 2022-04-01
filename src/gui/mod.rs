@@ -14,6 +14,7 @@ impl EventHandlers for Handlers {}
 struct Counter {
     // The counter value
     value: i32,
+    text_box: iced::text_input::State,
 
     // The local state of the two buttons
     increment_button: button::State,
@@ -24,7 +25,9 @@ struct Counter {
 pub enum Message {
     IncrementPressed,
     DecrementPressed,
+    SetPage(i32),
     EditName(String),
+    None
 }
 
 impl Counter {
@@ -33,22 +36,29 @@ impl Counter {
             value,
             increment_button: button::State::new(),
             decrement_button: button::State::new(),
+            text_box: iced::text_input::State::new(),
         }
     }
 
     pub fn view(&mut self) -> Row<Message> {
-        // We use a column: a simple vertical layout
+        let text_box = TextInput::new(&mut self.text_box, "Enter page", &self.value.to_string(), |e| {
+            if e.is_empty() {
+                return Message::SetPage(0);
+            }
+            let p = e.parse();
+            match p {
+                Ok(p) => Message::SetPage(p),
+                Err(e) => Message::None,
+            }
+        }).size(50).width(Length::FillPortion(5));
+
         Row::new()
             .push(
                 Button::new(&mut self.decrement_button, Text::new("-"))
                     .on_press(Message::DecrementPressed),
             )
             .push(
-                // We show the value of the counter here
-                Text::new(self.value.to_string())
-                    .size(50)
-                    .width(Length::FillPortion(5))
-                    .horizontal_alignment(iced::HorizontalAlignment::Center),
+                text_box,
             )
             .push(
                 Button::new(&mut self.increment_button, Text::new("+"))
@@ -149,6 +159,10 @@ impl Application for Tour {
                 self.page -= 1;
             }
             Message::EditName(name) => self.book_name = name,
+            Message::SetPage(p) => {
+                self.page = p
+            },
+            Message::None => (),
         }
         self.counter.update(self.page);
         save_settings(AppState {
