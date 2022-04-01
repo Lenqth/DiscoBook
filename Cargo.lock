@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "font-loader",
  "iced",
+ "iced_native",
  "lazy_static",
  "rustcord",
  "serde",

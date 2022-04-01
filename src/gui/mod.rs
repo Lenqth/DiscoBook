@@ -1,5 +1,6 @@
 use std::time::SystemTime;
 
+use iced::keyboard::{self, Event};
 use iced::{Application, Clipboard, Command, Container, Element, Length, Row, Sandbox, Scrollable, Space, TextInput, button, scrollable};
 use iced::{Button, Column, Text};
 use rustcord::{EventHandlers, RichPresenceBuilder, Rustcord, User};
@@ -85,6 +86,16 @@ impl Tour {
     }
 }
 
+fn handle_key(key_code: keyboard::KeyCode) -> Option<Message> {
+    match key_code {
+        keyboard::KeyCode::Left => Some(Message::DecrementPressed),
+        keyboard::KeyCode::Right => Some(Message::IncrementPressed),
+        keyboard::KeyCode::Space => Some(Message::IncrementPressed),
+        keyboard::KeyCode::Enter => Some(Message::IncrementPressed),
+        _ => None,
+    }
+}
+
 impl Application for Tour {
     type Message = Message;
     type Executor = iced::executor::Default;
@@ -109,6 +120,24 @@ impl Application for Tour {
 
     fn title(&self) -> String {
         format!("本を読む")
+    }
+
+    fn subscription(&self) -> iced::Subscription<Self::Message> {
+        use iced_native::{keyboard, subscription, Event};
+
+        subscription::events_with(|event, status| match event {
+            Event::Keyboard(keyboard::Event::KeyPressed {
+                modifiers: _,
+                key_code,
+            }) => {
+                if status == iced_native::event::Status::Ignored {
+                    handle_key(key_code)
+                } else {
+                    None
+                }
+            },
+            _ => None,
+        })        
     }
 
     fn update(&mut self, event: Message, _: &mut Clipboard) -> Command<Message> {

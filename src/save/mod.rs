@@ -32,7 +32,7 @@ pub fn load_settings() -> Option<AppState> {
 }
 
 pub fn save_settings(app_state: AppState) {
-    let f = File::options().create(true).write(true).open("./settings.json").unwrap();
+    let f = File::options().create(true).write(true).truncate(true).open("./settings.json").unwrap();
     let writer = BufWriter::new(f);
     serde_json::to_writer(writer, &app_state).unwrap();
 
