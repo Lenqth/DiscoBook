@@ -1,11 +1,14 @@
 use std::time::SystemTime;
 
-use iced::keyboard::{self, Event};
-use iced::{Application, Clipboard, Command, Container, Element, Length, Row, Sandbox, Scrollable, Space, TextInput, button, scrollable};
+use iced::keyboard;
+use iced::{
+    button, Application, Clipboard, Command, Container, Element, Length, Row, Space,
+    TextInput,
+};
 use iced::{Button, Column, Text};
-use rustcord::{EventHandlers, RichPresenceBuilder, Rustcord, User};
+use rustcord::{EventHandlers, RichPresenceBuilder, Rustcord};
 
-use crate::save::{AppState, save_settings};
+use crate::save::{save_settings, AppState};
 
 struct Handlers;
 
@@ -27,7 +30,7 @@ pub enum Message {
     DecrementPressed,
     SetPage(i32),
     EditName(String),
-    None
+    None,
 }
 
 impl Counter {
@@ -41,25 +44,30 @@ impl Counter {
     }
 
     pub fn view(&mut self) -> Row<Message> {
-        let text_box = TextInput::new(&mut self.text_box, "Enter page", &self.value.to_string(), |e| {
-            if e.is_empty() {
-                return Message::SetPage(0);
-            }
-            let p = e.parse();
-            match p {
-                Ok(p) => Message::SetPage(p),
-                Err(e) => Message::None,
-            }
-        }).size(50).width(Length::FillPortion(5));
+        let text_box = TextInput::new(
+            &mut self.text_box,
+            "Enter page",
+            &self.value.to_string(),
+            |e| {
+                if e.is_empty() {
+                    return Message::SetPage(0);
+                }
+                let p = e.parse();
+                match p {
+                    Ok(p) => Message::SetPage(p),
+                    Err(_e) => Message::None,
+                }
+            },
+        )
+        .size(50)
+        .width(Length::FillPortion(5));
 
         Row::new()
             .push(
                 Button::new(&mut self.decrement_button, Text::new("-"))
                     .on_press(Message::DecrementPressed),
             )
-            .push(
-                text_box,
-            )
+            .push(text_box)
             .push(
                 Button::new(&mut self.increment_button, Text::new("+"))
                     .on_press(Message::IncrementPressed),
@@ -92,7 +100,6 @@ impl Tour {
         self.discord
             .update_presence(presence)
             .expect("Could not update presence");
-
     }
 }
 
@@ -129,7 +136,7 @@ impl Application for Tour {
     }
 
     fn title(&self) -> String {
-        format!("本を読む")
+        "本を読む".to_string()
     }
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {
@@ -145,9 +152,9 @@ impl Application for Tour {
                 } else {
                     None
                 }
-            },
+            }
             _ => None,
-        })        
+        })
     }
 
     fn update(&mut self, event: Message, _: &mut Clipboard) -> Command<Message> {
@@ -159,9 +166,7 @@ impl Application for Tour {
                 self.page -= 1;
             }
             Message::EditName(name) => self.book_name = name,
-            Message::SetPage(p) => {
-                self.page = p
-            },
+            Message::SetPage(p) => self.page = p,
             Message::None => (),
         }
         self.counter.update(self.page);
@@ -176,7 +181,7 @@ impl Application for Tour {
 
     fn view(&mut self) -> Element<Message> {
         let Tour {
-            page,
+            page: _,
             book_name,
 
             counter,
@@ -187,7 +192,8 @@ impl Application for Tour {
         let mut controls = Column::new();
         let text_box = TextInput::new(text_box, "Enter book name", book_name, |e| {
             Message::EditName(e)
-        }).size(50);
+        })
+        .size(50);
 
         controls = controls.push(text_box);
         controls = controls.push(Space::with_height(Length::Units(50)));
@@ -209,5 +215,4 @@ impl Application for Tour {
             .center_y()
             .into()
     }
-
 }
