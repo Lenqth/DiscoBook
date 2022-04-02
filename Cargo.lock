@@ -3,19 +3,6 @@
 version = 3
 
 [[package]]
-name = "DiscoBook"
-version = "0.1.0"
-dependencies = [
- "font-loader",
- "iced",
- "iced_native",
- "lazy_static",
- "rustcord",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "ab_glyph"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -598,6 +585,19 @@ dependencies = [
  "libc",
  "redox_users",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "disco_book"
+version = "0.1.0"
+dependencies = [
+ "font-loader",
+ "iced",
+ "iced_native",
+ "lazy_static",
+ "rustcord",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
